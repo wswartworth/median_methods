@@ -143,22 +143,53 @@ def bernoulli_with_errors(rows, cols, errors, max_error):
 #Then we wouldn't need the same for loop inside of every chunk of code.  
 
 class MethodIterator:
-	__init__(self, A, b, init_vect):
+	def __init__(self, A, b, init_vect):
 		self.A = A
 		self.b = b
 		self.init_vect = init_vect
-		self.guess = x
+		self.guess = init_vect
 		self.rows, self.cols = self.A.shape
 
 	def perform_iteration(self):
 		pass
 
-	def getIterate(self):
-		return self.x
+	def currentGuess(self):
+		return self.guess
 
-class RKIterator(MethodIterator):
+	def distanceTo(self, soln):
+		return np.linalg.norm(np.reshape(soln, self.cols) - self.guess)
+
+
+class RK(MethodIterator):
+
+	def __init__(self, A, b, init_vect):
+		super().__init__(A,b,init_vect)
+
 	def perform_iteration(self):
-		rows, cols
+		idx = np.random.randint(0,rows)
+		v = self.A[idx]
+		c = (np.dot(v,self.guess) - self.b[idx])/(np.dot(v,v))
+		self.guess = self.guess - c*v
+
+def errors_by_iteration(method, iters, soln):
+	errors = []
+	for i in range(0,iters):
+		errors.append(method.distanceTo(soln))
+		method.perform_iteration()
+	return errors 
+
+def classTest():
+	rows, cols = 100,50000
+	iters = 4000
+	A,b,soln = normalized_gaussian_with_errors(rows,cols,15000, max_error=1)
+	initvect = np.zeros(cols)
+	rk = RK(A,b,initvect)
+	errs = errors_by_iteration(rk, iters, soln)
+
+	plt.plot(errs, label = 'SGD median', linewidth = thickness)
+
+classTest()
+
 
 
 
@@ -763,4 +794,4 @@ def adversarial_test(rows, cols, iters, frac_corrupted):
 #make_plots(5000, 100, 500, 3000)
 #median_sgd_plot(50000, 100, 15000, 20000)
 
-adversarial_test(50000, 100, 10000, 0.25)
+#adversarial_test(50000, 100, 10000, 0.25)
