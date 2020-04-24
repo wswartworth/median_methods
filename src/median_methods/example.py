@@ -9,4 +9,4 @@ class Example:
             >>> e.get_value()
             10
         """
-        return 10
+        eturn 10
