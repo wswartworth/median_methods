@@ -1,3 +1,4 @@
+
 import numpy as np
 import statistics
 import matplotlib.pyplot as plt
@@ -6,7 +7,7 @@ import scipy.sparse as sp
 from zlib import crc32
 random = np.random.RandomState(crc32(str.encode(__file__)))
 
-
+#The code that I wrote here is pretty hacky. (Please don't judge me)
 
 ########## SYSTEM GENERATION ###########
 # Each method returns a triple (A,b,x).  Our goal is to solve Av = b for the pseudo-solution x.
@@ -136,6 +137,30 @@ def bernoulli_with_errors(rows, cols, errors, max_error):
 
 
 ######### RECOVERY ALGORITHMS #########
+
+
+#maybe each type of iteration should inherit from a class called IterationMethod
+#Then we wouldn't need the same for loop inside of every chunk of code.  
+
+class MethodIterator:
+	__init__(self, A, b, init_vect):
+		self.A = A
+		self.b = b
+		self.init_vect = init_vect
+		self.guess = x
+		self.rows, self.cols = self.A.shape
+
+	def perform_iteration(self):
+		pass
+
+	def getIterate(self):
+		return self.x
+
+class RKIterator(MethodIterator):
+	def perform_iteration(self):
+		rows, cols
+
+
 
 #Each method returns the approximate pseudosolution, along with a list containing
 #the norm of the error after each iteration.
