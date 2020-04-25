@@ -7,6 +7,9 @@ import scipy.sparse as sp
 from zlib import crc32
 random = np.random.RandomState(crc32(str.encode(__file__)))
 
+#abstract classes
+from abc import ABC, abstractmethod
+
 #The code that I wrote here is pretty hacky. (Please don't judge me)
 
 ########## SYSTEM GENERATION ###########
@@ -138,20 +141,36 @@ def bernoulli_with_errors(rows, cols, errors, max_error):
 
 ######### RECOVERY ALGORITHMS #########
 
+class IterativeMethod(ABC):
 
-#maybe each type of iteration should inherit from a class called IterationMethod
-#Then we wouldn't need the same for loop inside of every chunk of code.  
-
-class MethodIterator:
-	def __init__(self, A, b, init_vect):
+	def __init__(self, A, b, start):
 		self.A = A
 		self.b = b
-		self.init_vect = init_vect
-		self.guess = init_vect
+		self.start = start
+		self.guess = start
 		self.rows, self.cols = self.A.shape
+		self.row_idx = None #The index of the last row that was sampled
+		#ADD: normalize rows of A
 
-	def perform_iteration(self):
+	@abstractmethod
+	def sample_row_idx(self):
 		pass
+
+	@abstractmethod
+	def update_iterate(self, row_idx):
+		pass
+
+	def do_iteration(self):
+		self.row_idx = self.sample_row_idx()
+		self.update_iterate(self.row_idx)
+
+	#offset to the hyperplane indexed by last sampled index
+	#TODO? Could avoid recomputing this value if desired
+	def cur_offset_to_hyperplane(self):
+		return self.offset_to_hyperplane(self.row_idx)
+
+	def offset_to_hyperplane(self, idx):
+		return np.dot(self.A[idx], self.guess) - self.b[idx]
 
 	def currentGuess(self):
 		return self.guess
@@ -159,34 +178,81 @@ class MethodIterator:
 	def distanceTo(self, soln):
 		return np.linalg.norm(np.reshape(soln, self.cols) - self.guess)
 
+class UniformRowMethod(IterativeMethod):
 
-class RK(MethodIterator):
+	def __init__(self, A, b, start):
+		super().__init__(A,b,start)
 
-	def __init__(self, A, b, init_vect):
-		super().__init__(A,b,init_vect)
+	def sample_row_idx(self):
+		return np.random.randint(0,self.rows)
 
-	def perform_iteration(self):
-		idx = np.random.randint(0,rows)
-		v = self.A[idx]
-		c = (np.dot(v,self.guess) - self.b[idx])/(np.dot(v,v))
-		self.guess = self.guess - c*v
+class ThresholdedRK(UniformRowMethod):
+
+	def __init__(self, A, b, start):
+		super().__init__(A,b,start)
+
+	@abstractmethod
+	def threshold(self):
+		pass
+
+	def update_iterate(self, idx):
+		d = self.offset_to_hyperplane(idx)
+		if(abs(d) <= self.threshold()):
+			self.guess = self.guess - d * self.A[idx]
+
+class RK(ThresholdedRK):
+
+	def __init__(self, A, b, start):
+		super().__init__(A,b,start)
+
+	def threshold(self):
+		return float("inf")
+
+#TO DO: Avoid the initial "lag"
+class SWQuantileMethod(IterativeMethod):
+
+	def __init__(self, A, b, start, window_size, quantile):
+		super().__init__(A,b,start)
+		self.window_size = window_size
+		self.quantile = quantile
+		self.window = self.window_size*[math.inf]
+
+	#fix this to use a quantile
+	def cur_quantile(self):
+		return statistics.median(self.window[-self.window_size:])
+
+	def do_iteration(self):
+		super().do_iteration()
+		self.window.append(abs(self.cur_offset_to_hyperplane()))
+
+class SWQuantileRK(SWQuantileMethod, ThresholdedRK):
+
+	def __init__(self, A, b, start, window_size, quantile):
+		SWQuantileMethod.__init__(self, A, b, start, window_size, quantile)
+
+	def threshold(self):
+		return self.cur_quantile()
+
 
 def errors_by_iteration(method, iters, soln):
 	errors = []
 	for i in range(0,iters):
 		errors.append(method.distanceTo(soln))
-		method.perform_iteration()
+		method.do_iteration()
 	return errors 
 
 def classTest():
-	rows, cols = 100,50000
-	iters = 4000
-	A,b,soln = normalized_gaussian_with_errors(rows,cols,15000, max_error=1)
+	rows, cols = 50000,100
+	iters = 20000
+	A,b,soln = normalized_gaussian_with_errors(rows,cols,1000, max_error=1)
 	initvect = np.zeros(cols)
+
+	#rk = SWQuantileRK(A,b,initvect, 100, 0.5)
 	rk = RK(A,b,initvect)
 	errs = errors_by_iteration(rk, iters, soln)
 
-	plt.plot(errs, label = 'SGD median', linewidth = thickness)
+	plt.plot(errs, label = 'SGD median')
+	plt.show()
 
 classTest()
 
