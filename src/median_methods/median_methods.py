@@ -17,7 +17,7 @@ class IterativeMethod(ABC):
 		self.guess = start
 		self.rows, self.cols = self.A.shape
 		self.row_idx = None #The index of the last row that was sampled
-		#ADD: normalize rows of A
+		#TODO: normalize rows of A
 
 	@abstractmethod
 	def sample_row_idx(self):
@@ -129,14 +129,9 @@ class SampledQuantileMethod(QuantileMethod):
 		super().__init__(A,b,start,quantile=quantile)
 		self.samples = samples
 
-	#update to give quantile
 	def get_quantile(self):
-		distances = []
-		#not very pythonic...
-		for i in range(0,self.samples):
-			rand_idx = np.random.randint(0,self.rows)
-			d = abs(self.offset_to_hyperplane(rand_idx))
-			distances.append(d)
+		sampled_indices = np.random.randint(self.rows, size=self.samples)
+		distances = [abs(self.offset_to_hyperplane(i)) for i in sampled_indices]
 		return np.quantile(distances,self.quantile)
 
 

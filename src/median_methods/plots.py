@@ -21,7 +21,7 @@ def make_plot(methods, iters, soln):
 
 def plot_test():
 
-	rows, cols, errs, iters = 10, 5, 0, 10
+	rows, cols, errs, iters = 50000, 100, 2000, 2000
 	A,b,soln = sysgen.normalized_gaussian_with_errors(rows,cols,errs, max_error=1)
 	initvect = np.zeros(cols)
 
@@ -34,8 +34,14 @@ def plot_test():
 	fixed_sgd = methods.FixedStepSGD(*start_data,eta=0.1)
 	opt_sgd = methods.OptSGD(A,b,initvect, soln=soln)
 
-	method_list = [[rk, "rk"], [sw_rk,"sw_rk"], [sample_rk, "sample_rk"], 
-	[sw_sgd, "sw_sgd"], [fixed_sgd, "fixed_sgd"], [opt_sgd, "opt_sgd"]]
+	method_list = [
+	[rk, "rk"], 
+	[sw_rk,"sw_rk"], 
+	[sample_rk, "sample_rk"], 
+	[sw_sgd, "sw_sgd"], 
+	[fixed_sgd, "fixed_sgd"], 
+	#[opt_sgd, "opt_sgd"]
+	]
 
 	make_plot(method_list, iters, soln).show()
 
