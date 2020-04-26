@@ -1,13 +1,13 @@
 
 import numpy as np
-#import statistics
-import math
-import scipy.sparse as sp
-from zlib import crc32
-random = np.random.RandomState(crc32(str.encode(__file__)))
-from abc import ABC, abstractmethod #abstract classes
+from abc import ABC, abstractmethod 
 
-#abstract
+#partial gradient used for l1 methods
+def l1_partial_grad(A_i, b_i, x):
+	return np.sign(np.dot(A_i,x) - b_i) * A_i
+
+############ Abstract Classes ############
+
 class IterativeMethod(ABC):
 
 	def __init__(self, A, b, start):
@@ -45,7 +45,6 @@ class IterativeMethod(ABC):
 	def distanceTo(self, soln):
 		return np.linalg.norm(np.reshape(soln, self.cols) - self.guess)
 
-#abstract
 class UniformRowMethod(IterativeMethod):
 
 	def __init__(self, A, b, start):
@@ -54,8 +53,7 @@ class UniformRowMethod(IterativeMethod):
 	def sample_row_idx(self):
 		return np.random.randint(0,self.rows)
 
-#Abstract
-class ThresholdedRK(UniformRowMethod):
+class ThresholdedRKMethod(UniformRowMethod):
 
 	def __init__(self, A, b, start):
 		super().__init__(A,b,start)
@@ -71,7 +69,6 @@ class ThresholdedRK(UniformRowMethod):
 		else:
 			return guess
 
-#abstract
 class QuantileMethod(IterativeMethod):
 
 	def __init__(self, A, b, start, *, quantile):
@@ -82,7 +79,18 @@ class QuantileMethod(IterativeMethod):
 	def get_quantile(self):
 		pass
 
-#abstract
+class OptStepMethod(IterativeMethod):
+
+	def __init__(self, A, b, start, *, soln):
+		super().__init__(A,b,start)
+		self.soln = soln
+
+	def opt_step_size(self):
+		avg = (1/self.rows)*sum([l1_partial_grad(self.A[i], self.b[i], self.guess) for i in range(0,self.rows)])
+		row_soln = np.reshape(self.soln, self.cols)
+		e = self.guess - row_soln
+		return np.dot(e, avg)
+
 class SGDMethod(UniformRowMethod):
 
 	def __init__(self, A, b, start):
@@ -92,19 +100,12 @@ class SGDMethod(UniformRowMethod):
 	def step_size(self):
 		pass
 
-	'''Partial subgradient for the l1 objective'''
-	#def l1_gradient(self, x, a_i, b_i):
-	#	ret = np.sign(np.dot(a_i,x)-b_i) * a_i
-	#	return ret
-
 	def next_iterate(self, idx, guess):
-		a = self.A[idx]
-		return guess - self.step_size() * np.sign(np.dot(a,guess) - self.b[idx]) * a
+		grad = l1_partial_grad(self.A[idx], self.b[idx], guess)
+		return guess - self.step_size() * grad
 
 
-#TO DO: Avoid the initial "lag"
-#Sliding window approach
-#Abstract
+'''Sliding window approach'''
 class SWQuantileMethod(QuantileMethod):
 
 	def __init__(self, A, b, start, *, quantile, window_size):
@@ -112,7 +113,7 @@ class SWQuantileMethod(QuantileMethod):
 		self.window_size = window_size
 		self.window = [0]
 
-	#fix this to use a quantile
+	#Note: uses a smaller window until enough samples are taken
 	def get_quantile(self):
 		return np.quantile(self.window[-self.window_size:], self.quantile)
 
@@ -121,8 +122,7 @@ class SWQuantileMethod(QuantileMethod):
 		super().do_iteration()
 		self.window.append(abs(self.cur_offset_to_hyperplane())) #clean this up perhaps
 
-#Subsample the rows with replacement
-#Abstract
+'''Subsample the rows with replacement'''
 class SampledQuantileMethod(QuantileMethod):
 
 	def __init__(self, A, b, start, *, quantile, samples):
@@ -140,16 +140,16 @@ class SampledQuantileMethod(QuantileMethod):
 		return np.quantile(distances,self.quantile)
 
 
-##### non-abstract ############
-class RK(ThresholdedRK):
+############## Concrete Classes ##############
+class RK(ThresholdedRKMethod):
 
 	def __init__(self, A, b, start):
 		super().__init__(A,b,start)
 
 	def threshold(self):
-		return math.inf
+		return np.inf
 
-class SampledQuantileRK(SampledQuantileMethod, ThresholdedRK):
+class SampledQuantileRK(SampledQuantileMethod, ThresholdedRKMethod):
 
 	def __init__(self, A, b, start, *, quantile, samples):
 		SampledQuantileMethod.__init__(self, A,b,start,quantile=quantile,samples=samples)
@@ -157,7 +157,7 @@ class SampledQuantileRK(SampledQuantileMethod, ThresholdedRK):
 	def threshold(self):
 		return self.get_quantile()
 
-class SWQuantileRK(SWQuantileMethod, ThresholdedRK):
+class SWQuantileRK(SWQuantileMethod, ThresholdedRKMethod):
 
 	def __init__(self, A, b, start, *, quantile, window_size):
 		SWQuantileMethod.__init__(self, A, b, start, quantile=quantile, window_size=window_size)
@@ -173,49 +173,19 @@ class SW_SGD(SWQuantileMethod, SGDMethod):
 	def step_size(self):
 		return self.get_quantile()
 
-class Fixed_Step_SGD(SGDMethod):
+class FixedStepSGD(SGDMethod):
 
-	def __init__(self, A, b, start, *, step_size):
-		super().__init__(self, A, b, start)
-		self.step_size = step_size
+	def __init__(self, A, b, start, *, eta):
+		super().__init__(A, b, start)
+		self.eta = eta
 
 	def step_size(self):
-		return self.step_size
+		return self.eta
 
+class OptSGD(OptStepMethod, SGDMethod):
 
-########### end classes ##############
+	def __init__(self, A, b, start, *, soln):
+		OptStepMethod.__init__(self, A,b,start, soln=soln)
 
-
-
-#SGD l1 minimization with the optimal step size chosen at each iteration.
-#optimal means that the step size is chosen to minimize the expected
-#squared norm of the error after the next iteration.  
-#(One could argue that the optimal algorithm should really minimize the
-#norm of the error rather than the squared norm.)
-#this algorithm cheats by using the actual solution.
-#Very slow!
-def OPT_SGD(A, b, iters, soln):
-	rows, cols = A.shape
-	guess = np.zeros(cols)
-	errors = []
-
-	def opt_step_size(x):
-		avg = (1/rows)*sum([gr(x, A[i], b[i]) for i in range(0,rows)])
-		row_soln = np.reshape(soln, cols)
-		e = x - row_soln
-		return np.dot(e, avg)
-
-	for i in range(0,iters):
-
-		eta = opt_step_size(guess)
-		guess = SGD_iteration(A,b,guess,eta)
-
-		error = np.linalg.norm(np.reshape(soln, cols) - guess)
-		if i == 0:
-			first_error = error
-			errors.append(1)
-		else:
-			errors.append(error/first_error)
-
-
-	return guess, errors
+	def step_size(self):
+		return self.opt_step_size()
