@@ -168,6 +168,14 @@ class SW_SGD(SWQuantileMethod, SGDMethod):
 	def step_size(self):
 		return self.get_quantile()
 
+class SampledQuantileSGD(SampledQuantileMethod, SGDMethod):
+
+	def __init__(self, A, b, start, *, quantile, samples):
+		SampledQuantileMethod.__init__(self, A,b,start,quantile=quantile,samples=samples)
+
+	def step_size(self):
+		return self.get_quantile()
+
 class FixedStepSGD(SGDMethod):
 
 	def __init__(self, A, b, start, *, eta):

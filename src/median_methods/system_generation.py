@@ -104,18 +104,18 @@ def uniform_entries_with_errors(rows, cols, errors, *, low=0, high=1, max_error=
     Entries of A are initially sampled uniform in (low,high). Then each row of A is normalized.
     This can be used to generate poorly-conditioned systems.
     """
-	A = np.random.uniform(low, high, (rows, cols))
-	for i in range(0,rows):
-		A[i] = A[i]/(np.linalg.norm(A[i]))
+    A = np.random.uniform(low, high, (rows, cols))
+    for i in range(0,rows):
+        A[i] = A[i]/(np.linalg.norm(A[i]))
 
-	x = np.random.uniform(-5, 5, (cols, 1))
-	b = np.matmul(A, x)
+    x = np.random.uniform(-5, 5, (cols, 1))
+    b = np.matmul(A, x)
 
-	bad_rows = np.random.choice(rows, errors, replace = False)
-	for i in bad_rows:
-		b[i] = np.random.uniform(-max_error, max_error)
+    bad_rows = np.random.choice(rows, errors, replace = False)
+    for i in bad_rows:
+        b[i] = np.random.uniform(-max_error, max_error)
 		#b[i] = 1
-	return (A,b,x)
+    return (A,b,x)
 
 def bernoulli_with_errors(rows, cols, errors, *, max_error=1):
 	A = np.random.binomial(1, 0.5, (rows,cols))*2 - np.ones((rows,cols));

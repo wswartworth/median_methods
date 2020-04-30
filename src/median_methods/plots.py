@@ -30,6 +30,7 @@ def plot_test():
 	rk = methods.RK(*start_data)
 	sw_rk = methods.SWQuantileRK(*start_data, quantile=0.9, window_size=100)
 	sample_rk = methods.SampledQuantileRK(*start_data, quantile=0.9, samples=100)
+	sample_sgd = methods.SampledQuantileSGD(*start_data, quantile=0.3, samples=100)
 	sw_sgd = methods.SW_SGD(*start_data, quantile=0.5, window_size=100)
 	fixed_sgd = methods.FixedStepSGD(*start_data,eta=0.1)
 	opt_sgd = methods.OptSGD(*start_data, soln=soln)
@@ -38,6 +39,7 @@ def plot_test():
 	[rk, "rk"], 
 	[sw_rk,"sw_rk"], 
 	[sample_rk, "sample_rk"], 
+	[sample_sgd, "sample_sgd"],
 	[sw_sgd, "sw_sgd"], 
 	[fixed_sgd, "fixed_sgd"], 
 	#[opt_sgd, "opt_sgd"]
