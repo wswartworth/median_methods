@@ -17,7 +17,7 @@ class IterativeMethod(ABC):
 		self.guess = start
 		self.rows, self.cols = self.A.shape
 		self.row_idx = None #The index of the last row that was sampled
-		#TODO: normalize rows of A
+		#TODO: normalize rows of A?
 
 	@abstractmethod
 	def sample_row_idx(self):

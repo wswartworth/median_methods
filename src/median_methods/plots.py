@@ -22,17 +22,17 @@ def make_plot(methods, iters, soln):
 def plot_test():
 
 	rows, cols, errs, iters = 50000, 100, 2000, 2000
-	A,b,soln = sysgen.normalized_gaussian_with_errors(rows,cols,errs, max_error=1)
-	initvect = np.zeros(cols)
+	A,b,soln = sysgen.normalized_gaussian_with_errors(rows, cols, errs, max_error=1)
+	start = np.zeros(cols)
 
-	start_data = [A,b,initvect]
+	start_data = [A,b,start]
 
 	rk = methods.RK(*start_data)
 	sw_rk = methods.SWQuantileRK(*start_data, quantile=0.9, window_size=100)
 	sample_rk = methods.SampledQuantileRK(*start_data, quantile=0.9, samples=100)
 	sw_sgd = methods.SW_SGD(*start_data, quantile=0.5, window_size=100)
 	fixed_sgd = methods.FixedStepSGD(*start_data,eta=0.1)
-	opt_sgd = methods.OptSGD(A,b,initvect, soln=soln)
+	opt_sgd = methods.OptSGD(*start_data, soln=soln)
 
 	method_list = [
 	[rk, "rk"], 

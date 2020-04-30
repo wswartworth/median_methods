@@ -89,7 +89,7 @@ def normalized_gaussian_matrix(rows, cols):
 
 
 #Rows of A are normalized Gaussian vectors (i.e. uniform over the unit sphere)
-def normalized_gaussian_with_errors(rows, cols, errors, max_error):
+def normalized_gaussian_with_errors(rows, cols, errors, *, max_error=1):
 	A,b,x = normalized_gaussian(rows,cols)
 
 	bad_rows = np.random.choice(rows, errors, replace = False)
@@ -97,9 +97,13 @@ def normalized_gaussian_with_errors(rows, cols, errors, max_error):
 		b[i] = np.random.uniform(-max_error, max_error)
 	return (A,b,x)
 
-#entries of A are initially sampled uniform in (low,high). Then each row of A is normalized.
-#This can be used to generate poorly-conditioned systems.
-def uniform_entries_with_errors(rows, cols, low, high, errors, max_error):
+
+def uniform_entries_with_errors(rows, cols, errors, *, low=0, high=1, max_error=1):
+
+    """
+    Entries of A are initially sampled uniform in (low,high). Then each row of A is normalized.
+    This can be used to generate poorly-conditioned systems.
+    """
 	A = np.random.uniform(low, high, (rows, cols))
 	for i in range(0,rows):
 		A[i] = A[i]/(np.linalg.norm(A[i]))
@@ -113,7 +117,7 @@ def uniform_entries_with_errors(rows, cols, low, high, errors, max_error):
 		#b[i] = 1
 	return (A,b,x)
 
-def bernoulli_with_errors(rows, cols, errors, max_error):
+def bernoulli_with_errors(rows, cols, errors, *, max_error=1):
 	A = np.random.binomial(1, 0.5, (rows,cols))*2 - np.ones((rows,cols));
 	for i in range(0,rows):
 		A[i] = A[i]/(np.linalg.norm(A[i]))
