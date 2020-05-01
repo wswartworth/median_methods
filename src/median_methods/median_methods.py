@@ -123,6 +123,7 @@ class SWQuantileMethod(QuantileMethod):
 		self.window.append(abs(self.cur_offset_to_hyperplane())) #clean this up perhaps
 
 '''Subsample the rows with replacement'''
+'''TODO: Without replacement'''
 class SampledQuantileMethod(QuantileMethod):
 
 	def __init__(self, A, b, start, *, quantile, samples):
@@ -134,6 +135,9 @@ class SampledQuantileMethod(QuantileMethod):
 		distances = [abs(self.offset_to_hyperplane(i)) for i in sampled_indices]
 		return np.quantile(distances,self.quantile)
 
+'''Use all rows rather than a sample'''
+class FullQuantileMethod(QuantileMehthod):
+	pass
 
 ############## Concrete Classes ##############
 class RK(ThresholdedRKMethod):
