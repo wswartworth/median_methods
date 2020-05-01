@@ -9,7 +9,7 @@ with open("README.md") as readme_file:
     readme = readme_file.read()
 
 test_requirements = [
-    "numpy"
+
 ]
 
 docs_requirements = [
@@ -17,7 +17,7 @@ docs_requirements = [
 ]
 
 setup_requirements = [
-    
+    "numpy"
 ]
 
 dev_requirements = [
