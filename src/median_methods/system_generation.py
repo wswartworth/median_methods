@@ -2,6 +2,25 @@ import numpy as np
 
 # Each method returns a triple (A,b,x).  Our goal is to solve Av = b for the pseudo-solution x.
 
+def row_normalize(A,b, *, vec_norm = 1):
+    """
+    Normalize the vector matrix 'A' to have row norms equal to 'vec_norm'. Divides entries
+    of vector 'b' by the corresponding values that each row of 'A' were.
+    """
+    rows,cols = A.shape
+    zerorows = []
+    newA = np.zeros([rows,cols])
+    newb = np.zeros([rows,1])
+    for i in range(rows):
+        normA = np.linalg.norm(A[i,:])
+        if normA > 0:
+            newA[i,:] = vec_norm*A[i,:]/normA
+            newb[i,:] = vec_norm*b[i,:]/normA
+        else:
+            zerorows = [zerorows,i]
+            newb[i,:] = b[i,:]
+    return newA,newb,zerorows
+
 #Credit to Jacob
 def normalize(orig_vec, *, norm_mat=None, vec_norm=1):
     """

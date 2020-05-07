@@ -2,6 +2,7 @@ import system_generation as sysgen
 import median_methods as methods 
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
 def errors_by_iteration(method, iters, soln):
 
@@ -11,12 +12,16 @@ def errors_by_iteration(method, iters, soln):
 		method.do_iteration()
 	return errors
 
-def make_plot(methods, iters, soln):
+def make_plot(methods, iters, soln, *, file_name = None):
 
 	for method,label in methods:
 		errs = errors_by_iteration(method, iters, soln)
-		plt.plot(errs, label=label)
+		fig = plt.plot(errs, label=label)
 	plt.legend()
+
+	if file_name is not None:
+		plt.savefig(file_name+'.png')
+		pickle.dump(fig,open(file_name+'.pickle','wb'))
 	return plt
 
 def plot_test():
@@ -47,7 +52,7 @@ def plot_test():
 
 	make_plot(method_list, iters, soln).show()
 
-plot_test()
+#plot_test()
 
 
 
