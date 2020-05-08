@@ -136,7 +136,7 @@ class SampledQuantileMethod(QuantileMethod):
 		return np.quantile(distances,self.quantile)
 
 '''Use all rows rather than a sample'''
-class FullQuantileMethod(QuantileMehthod):
+class FullQuantileMethod(QuantileMethod):
 	pass
 
 ############## Concrete Classes ##############
