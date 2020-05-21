@@ -12,11 +12,17 @@ def errors_by_iteration(method, iters, soln):
 		method.do_iteration()
 	return errors
 
-def make_plot(methods, iters, soln, *, file_name = None):
+def make_plot(methods, iters, soln, *, file_name = None, linedesigns = None):
 
+	lineind = 0
 	for method,label in methods:
 		errs = errors_by_iteration(method, iters, soln)
-		fig = plt.plot(errs, label=label)
+		if linedesigns is not None:
+			linedesign = linedesigns[lineind]
+			fig = plt.plot(errs,linedesign[0],linewidth=linedesign[1],markersize=linedesign[2],markevery=linedesign[3],label=label)
+			lineind = lineind + 1
+		else:
+			fig = plt.plot(errs, label=label)
 	plt.legend()
 
 	if file_name is not None:
