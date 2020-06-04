@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.random as random
 
 # Each method returns a triple (A,b,x).  Our goal is to solve Av = b for the pseudo-solution x.
 
@@ -82,6 +83,7 @@ def adversarially_corrupted(A, *, sln_norm_mat=None, sln_norm=1,
 
     return b, x2
 
+
 def normalized_gaussian(rows, cols):
 
 	def normal_gauss_vect(n):
@@ -96,6 +98,19 @@ def normalized_gaussian(rows, cols):
 	b = np.matmul(A, x)
 	return (A,b,x)
 
+
+def normalized_gaussian_matrix(rows, cols):
+    def normal_gauss_vect(n):
+        g = np.random.normal(0,1,n)
+        return (1/np.linalg.norm(g)) * g
+
+    A = np.zeros((rows,cols))
+    for i in range(0,rows):
+        A[i] = normal_gauss_vect(cols)
+
+    return A
+
+'''
 def normalized_gaussian_matrix(rows, cols):
 	def normal_gauss_vect(n):
 		g = np.random.normal(0,1,n)
@@ -105,7 +120,17 @@ def normalized_gaussian_matrix(rows, cols):
 	for i in range(0,rows):
 		A[i] = normal_gauss_vect(cols)
 	return A
+'''
 
+'''
+def normalized_gaussian_system(rows, cols):
+
+    gaussian_matrix = np.random.normal(size=(rows,cols))
+
+    x = np.random.uniform(-5, 5, (cols, 1))
+
+    return row_normalize(
+'''
 
 #Rows of A are normalized Gaussian vectors (i.e. uniform over the unit sphere)
 def normalized_gaussian_with_errors(rows, cols, errors, *, max_error=1):
