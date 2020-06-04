@@ -16,6 +16,7 @@ def errors_by_iteration(method, iters, soln):
 		method.do_iteration()
 	return errors
 
+<<<<<<< HEAD
 def final_error(method, iters, soln):
     for i in range(0,iters):
         method.do_iteration()
@@ -28,6 +29,19 @@ def make_plot(methods, iters, soln, *, file_name = None):
 		errs = errors_by_iteration(method, iters, soln)
 		fig = plt.plot(errs, label=label)
 
+=======
+def make_plot(methods, iters, soln, *, file_name = None, linedesigns = None):
+
+	lineind = 0
+	for method,label in methods:
+		errs = errors_by_iteration(method, iters, soln)
+		if linedesigns is not None:
+			linedesign = linedesigns[lineind]
+			fig = plt.plot(errs,linedesign[0],linewidth=linedesign[1],markersize=linedesign[2],markevery=linedesign[3],label=label)
+			lineind = lineind + 1
+		else:
+			fig = plt.plot(errs, label=label)
+>>>>>>> 52b2d8b7c421cd4bd218bcf2a91e214099e58d51
 	plt.legend()
 
 	if file_name is not None:
