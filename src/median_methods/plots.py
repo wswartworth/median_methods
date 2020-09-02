@@ -28,11 +28,11 @@ def make_plot(methods, iters, soln, *, file_name=None, linedesigns=None):
         errs = errors_by_iteration(method, iters, soln)
         if linedesigns is not None:
             linedesign = linedesigns[lineind]
-            fig = plt.plot(errs, linedesign[0], linewidth=linedesign[1], markersize=linedesign[2],
+            fig = plt.plot(errs/errs[0], linedesign[0], linewidth=linedesign[1], markersize=linedesign[2],
                            markevery=linedesign[3], label=label)
             lineind = lineind + 1
         else:
-            fig = plt.plot(errs, label=label)
+            fig = plt.plot(errs/errs[0], label=label)
     plt.legend()
 
     if file_name is not None:
