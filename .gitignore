@@ -110,3 +110,61 @@ ENV/
 *.icloud
 *.pickle
 *.pickle
+*.pickle
+experiments/jtest 2.pickle
+experiments/jtest 3.pickle
+experiments/jtest 4.pickle
+experiments/jtest.pickle
+experiments/tomo 10.pickle
+experiments/tomo 11.pickle
+experiments/tomo 12.pickle
+experiments/tomo 13.pickle
+experiments/tomo 14.pickle
+experiments/tomo 15.pickle
+experiments/tomo 16.pickle
+experiments/tomo 17.pickle
+experiments/tomo 18.pickle
+experiments/tomo 19.pickle
+experiments/tomo 2.pickle
+experiments/tomo 20.pickle
+experiments/tomo 21.pickle
+experiments/tomo 22.pickle
+experiments/tomo 3.pickle
+experiments/tomo 4.pickle
+experiments/tomo 5.pickle
+experiments/tomo 6.pickle
+experiments/tomo 7.pickle
+experiments/tomo 8.pickle
+experiments/tomo 9.pickle
+experiments/tomo.pickle
+experiments/wbc 2.pickle
+experiments/wbc.pickle
+experiments/jtest 2.pickle
+experiments/jtest 3.pickle
+experiments/jtest 4.pickle
+experiments/jtest.pickle
+experiments/tomo 10.pickle
+experiments/tomo 11.pickle
+experiments/tomo 12.pickle
+experiments/tomo 13.pickle
+experiments/tomo 14.pickle
+experiments/tomo 15.pickle
+experiments/tomo 16.pickle
+experiments/tomo 17.pickle
+experiments/tomo 18.pickle
+experiments/tomo 19.pickle
+experiments/tomo 2.pickle
+experiments/tomo 20.pickle
+experiments/tomo 21.pickle
+experiments/tomo 22.pickle
+experiments/tomo 3.pickle
+experiments/tomo 4.pickle
+experiments/tomo 5.pickle
+experiments/tomo 6.pickle
+experiments/tomo 7.pickle
+experiments/tomo 8.pickle
+experiments/tomo 9.pickle
+experiments/tomo.pickle
+experiments/wbc 2.pickle
+experiments/wbc.pickle
+*.pickle
